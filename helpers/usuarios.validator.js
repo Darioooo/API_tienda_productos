@@ -90,8 +90,37 @@ async function validarCambioContrasenia(body, hashPwd) {
   }
 }
 
+
+/* Validación de que existen dichos campos en el body y los strings no están vacíos */
+function validarCambioDireccionYTlf(body) {
+  if (
+    body.phone !== undefined &&
+    body.state !== undefined &&
+    body.city !== undefined &&
+    body.street !== undefined &&
+    body.number !== undefined &&
+    body.state !== "" &&
+    body.city !== "" &&
+    body.street !== "" 
+  ) {
+    return {
+      valido: true,
+      mensaje: "usuario modificado con éxito",
+    };
+  } else {
+    return {
+      valido: false,
+      mensaje: "faltan datos o son incorrectos",
+    };
+  }
+}
+
+
+
+
 module.exports = {
   validarCrearUsuario,
   validarModificarUsuario,
   validarCambioContrasenia,
+  validarCambioDireccionYTlf,
 };

@@ -8,6 +8,7 @@ const {
   crearUsuario,
   modificarUsuario,
   modificarContrasenia,
+  modificarDireccionYTlf,
   borrarUsuario,
   login,
 } = require("../controllers/usuarios.controller");
@@ -15,11 +16,12 @@ const {
 const {
   middlwareCrearUsuario,
   middlwareModificarUsuario,
+  middleWareContraseniaVerificadaYCambioContrasenia,
+  middlWareCambioDireccionYTlf,
   middlewareEmailValido,
   estaLoggeado,
   esAdmin,
   esEmailDuplicado,
-  middleWareContraseniaVerificadaYCambioContrasenia,
 } = require("../middlwares/usuario.middlwares");
 
 /* Podemos buscar todos los usuarios, o buscar un usuario en concreto mediante query cuando añadimos ?email:....@.... */
@@ -103,6 +105,25 @@ router.patch(
       res
         .status(400)
         .json({ msg: "la contraseña ha sido modificada con éxito" });
+    } catch (error) {
+      res.status(500).json({ msg: "error interno del servidor" });
+      console.error(error);
+    }
+  }
+);
+
+/* Realizamos otro PATCH para el caso de que se quieran modificar alguno de los datos de envio como dirección y teléfono de contacto */
+router.patch(
+  "/datos_envio/:id",
+  middlWareCambioDireccionYTlf,
+  async (req, res) => {
+    try {
+      await modificarDireccionYTlf(req.params.id, req.body);
+      res
+        .status(400)
+        .json({
+          msg: "la dirección o teléfono han sido modificados con éxito",
+        });
     } catch (error) {
       res.status(500).json({ msg: "error interno del servidor" });
       console.error(error);

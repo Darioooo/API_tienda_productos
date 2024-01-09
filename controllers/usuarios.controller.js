@@ -22,7 +22,18 @@ async function buscarPorId(id) {
 }
 
 /* Controlador que guarda en "nuevoUsuario" los datos proporcionados y que exige el schema usuario, encripta la contraseña, y lo guarda en la base de datos */
-async function crearUsuario(name, lastname, email, pwd, rol, phone, state, city, street, number) {
+async function crearUsuario(
+  name,
+  lastname,
+  email,
+  pwd,
+  rol,
+  phone,
+  state,
+  city,
+  street,
+  number
+) {
   const nuevoUsuario = new Usuario({
     name: name,
     lastname: lastname,
@@ -34,7 +45,6 @@ async function crearUsuario(name, lastname, email, pwd, rol, phone, state, city,
     city: city,
     street: street,
     number: number,
-    
   });
   await nuevoUsuario.save(); //mongoose ya comprueba que el email no está duplicado.
   return nuevoUsuario;
@@ -74,15 +84,32 @@ async function modificarContrasenia(id, nuevaPassword) {
   return usuarioAModificarContrasenia;
 }
 
+/* Controlador que recoge en "nuevaDireccionYTlf" los datos de teléfono y dirección a modificar del usuario buscado por id. En caso de que hubiera más datos en el body, no se cambiarían */
+async function modificarDireccionYTlf(id, body) {
+  const nuevaDireccionTlf = {
+    phone: body.phone,
+    state: body.state,
+    city: body.city,
+    street: body.street,
+    number: body.number,
+  };
+  const usuarioModificado = await Usuario.findByIdAndUpdate(
+    id,
+    nuevaDireccionTlf
+  );
+  return usuarioModificado;
+}
+
 /* Controlador para localizar un usuario por id y borrarlo de la base de datos */
 async function borrarUsuario(id) {
   const usuarioBorrado = await Usuario.findByIdAndDelete(id);
   return usuarioBorrado;
 }
 
-/* 
- * Controlador que comprueba que "email" y "password" con los que se intenta acceder a una area privada de usuario, existen en la base        de datos.
- * Después de la confirmación, a dicho usuario le asigna un token por un tiempo determinado */
+/*
+ * Controlador que comprueba que "email" y "password" con los que se intenta acceder a una area privada de usuario, existen en la base       de datos.
+ * Después de la confirmación, a dicho usuario le asigna un token por un tiempo determinado
+ */
 async function login(mail, pwd) {
   const usuarioEncontrado = await Usuario.findOne({ email: mail });
 
@@ -125,6 +152,7 @@ module.exports = {
   crearUsuario,
   modificarUsuario,
   modificarContrasenia,
+  modificarDireccionYTlf,
   borrarUsuario,
   login,
 };
