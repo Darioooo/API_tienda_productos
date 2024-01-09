@@ -1,3 +1,4 @@
+/* Validación de lo escrito en ls campos para crear usuario */
 function validarCrearProducto(body) {
   if (
     body.grupo === undefined ||
@@ -19,6 +20,7 @@ function validarCrearProducto(body) {
   }
 }
 
+/* Validación de lo escrito en ls campos para modificar usuario */
 function validarModificarProducto(body) {
   if (
     body.grupo === undefined ||

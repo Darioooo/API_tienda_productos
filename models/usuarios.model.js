@@ -1,7 +1,16 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+/* Modelo de usuario. Es el formato y atributos que tiene un usuario para ser aceptado y registrado en la colección de la base de datos */ 
 const usuarioSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  lastname: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     requiered: true,
@@ -15,10 +24,29 @@ const usuarioSchema = new Schema({
     type: String,
     requiered: true,
   },
+  phone: {
+    type: Number,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  street: {
+    type: String,
+    required: true,
+  },
+  number: {
+    type: Number,
+    required: true,
+  },
 });
 
-/* si necesitaramos que el atrubuto unique, afectase a dos datos en conjunto, la funcion en mongoose seria: ({email:1, rol:1}, {unique:true}) */
+/* Relacionamos la coleccion "usuarios" con "usuarioSchema", y la guardamos como "Usuario" para exportar y utilizar en nuestro código */
+const Usuario = mongoose.model("usuarios", usuarioSchema);
 
-const Usuarios = mongoose.model("usuarios", usuarioSchema);
-
-module.exports = Usuarios;
+module.exports = Usuario;

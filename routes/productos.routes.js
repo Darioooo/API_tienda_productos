@@ -4,24 +4,33 @@ const router = express.Router();
 const {
   buscarTodos,
   buscarPorId,
+  buscarPorGrupo,
   crearProducto,
   eliminarProducto,
   modificarProducto,
+  
 } = require("../controllers/productos.controller");
 const {
   validarCrearProducto,
   validarModificarProducto,
 } = require("../helpers/productos.validator");
 
+/* Podemos buscar todos los productos, o filtrado mediante query de grupo, donde pondremos --> ?grupo="embutidos","quesos" o "legumbres" */
 router.get("/", async (req, res) => {
   try {
-    const productos = await buscarTodos();
+    if(req.query.grupo){
+      productos = await buscarPorGrupo(req.query.grupo)
+    } else {
+      productos = await buscarTodos();
+    }
     res.json(productos);
+    
   } catch (error) {
     res.status(500).json({ msg: "error interno" + String(error) });
   }
 });
 
+/* Busqueda de producto por id */
 router.get("/:id", async (req, res) => {
   try {
     const productoEncontrado = await buscarPorId(req.params.id);
@@ -35,6 +44,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/* Creamos producto en caso de validación de los campos a rellenar */
 router.post("/", async (req, res) => {
   const resultadoValidacion = validarCrearProducto(req.body);
   if (!resultadoValidacion.valido) {
@@ -53,6 +63,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+/* Eliminar producto */
 router.delete("/:id", async (req, res) => {
   const productoBorrado = await eliminarProducto(req.params.id);
   try {
@@ -66,6 +77,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+/* Modificación de producto en caso de validación del nuevo, tendremos que rellenar todos los campos para ejecutarlo */
 router.put("/:id", async (req, res) => {
   const resultadoValidacion = validarModificarProducto(req.body);
   if (!resultadoValidacion.valido) {

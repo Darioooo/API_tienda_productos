@@ -7,6 +7,7 @@ const {
   buscarPorMail,
   crearUsuario,
   modificarUsuario,
+  modificarContrasenia,
   borrarUsuario,
   login,
 } = require("../controllers/usuarios.controller");
@@ -18,8 +19,10 @@ const {
   estaLoggeado,
   esAdmin,
   esEmailDuplicado,
+  middleWareContraseniaVerificadaYCambioContrasenia,
 } = require("../middlwares/usuario.middlwares");
 
+/* Podemos buscar todos los usuarios, o buscar un usuario en concreto mediante query cuando añadimos ?email:....@.... */
 router.get("/", async (req, res) => {
   try {
     if (req.query.email) {
@@ -33,6 +36,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+/* Ruta de busqueda de usuario por id */
 router.get("/:id", async (req, res) => {
   try {
     const usuarioEncontrado = await buscarPorId(req.params.id);
@@ -47,6 +51,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/* Ruta de creación de usuario */
 router.post(
   "/",
   middlwareCrearUsuario,
@@ -54,14 +59,26 @@ router.post(
   esEmailDuplicado,
   async (req, res) => {
     try {
-      await crearUsuario(req.body.email.trim(), req.body.password, req.body.rol);
+      await crearUsuario(
+        req.body.name,
+        req.body.lastname,
+        req.body.email.trim(),
+        req.body.password,
+        req.body.rol,
+        req.body.phone,
+        req.body.state,
+        req.body.city,
+        req.body.street,
+        req.body.number
+      );
       res.json({ msg: "usuario creado" });
     } catch (error) {
-      res.status(500).json({ msg: "error interno del servidor" });
+      res.status(500).json({ msg: "error interno del servidor, route" });
     }
   }
 );
 
+/* Ruta de modificación de usuario. Será necesario rellenar todos los campos para hacerlo efectivo */
 router.put(
   "/:id",
   middlwareModificarUsuario,
@@ -76,6 +93,24 @@ router.put(
   }
 );
 
+/* La ruta patch, en este caso, la utilizaremos para un supuesto caso de cambio de contraseña, en el que para modificar la contraseña, hay que escribir la anterior (password), y a mayores poner la misma contraseña dos veces en el body (body.nuevaPassword, repetirNuevaPassword).  */
+router.patch(
+  "/:id",
+  middleWareContraseniaVerificadaYCambioContrasenia,
+  async (req, res) => {
+    try {
+      await modificarContrasenia(req.params.id, req.body.nuevaPassword);
+      res
+        .status(400)
+        .json({ msg: "la contraseña ha sido modificada con éxito" });
+    } catch (error) {
+      res.status(500).json({ msg: "error interno del servidor" });
+      console.error(error);
+    }
+  }
+);
+
+/* Ruta de borrado de usuario por id */
 router.delete("/:id", async (req, res) => {
   try {
     const usuarioBorrado = await borrarUsuario(req.params.id);
@@ -89,6 +124,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+/* Ruta con la que el usuario de loggea, se comprueba email y contraseña, y se le asigna un token temporal al usuario para ingresar sin necesidad de loggearse de nuevo */
 router.post("/login", async (req, res) => {
   try {
     const resultado = await login(req.body.email, req.body.password);
@@ -98,6 +134,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/* Ruta de acceso a la zona privada del perfil de usuario, se comprueba que la cuenta tiene asignado token y éste es el que le corresponde */
 router.get("/zona-privada/perfil/:id", estaLoggeado, async (req, res) => {
   const usuarioEncontrado = await buscarPorId(req.params.id);
   res.json({
@@ -106,9 +143,7 @@ router.get("/zona-privada/perfil/:id", estaLoggeado, async (req, res) => {
   });
 });
 
-/*
- *zona-admin/home es una ruta común para todos los administradores, le damos esa funcionalidad, al igual que podríamos hacer cuna zona privada como con los user.
- */
+/* zona-admin/home es una ruta a una zona común para los que comparten el rol de administrador */
 router.get("/zona-admin/home", esAdmin, async (req, res) => {
   res.json({
     msg: "hola admin, estas dentro de tu perfil, token verificado",
