@@ -75,7 +75,7 @@ router.post(
       );
       res.json({ msg: "usuario creado" });
     } catch (error) {
-      res.status(500).json({ msg: "error interno del servidor, route" });
+      res.status(500).json({ msg: "error interno del servidor" });
     }
   }
 );
@@ -125,8 +125,9 @@ router.patch(
           msg: "la dirección o teléfono han sido modificados con éxito",
         });
     } catch (error) {
-      res.status(500).json({ msg: "error interno del servidor" });
       console.error(error);
+      res.status(500).json({ msg: "error interno del servidor" });
+      
     }
   }
 );
